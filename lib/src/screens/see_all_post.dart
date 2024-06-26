@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:state_change_demo/src/models/post.dart';
+import 'add_post.dart';
 
 class SeeAllPost extends StatefulWidget {
   static const String route = 'see-all-post';
@@ -16,11 +18,31 @@ class SeeAllPost extends StatefulWidget {
 
 class _SeeAllPostState extends State<SeeAllPost> {
   late Future<List<Post>> posts;
+  List<Post> _postList = [];
 
   @override
   void initState() {
     super.initState();
     posts = fetchData();
+  }
+
+  Future<void> _refreshPosts() async {
+    final fetchedPosts = await fetchData();
+    setState(() {
+      _postList = fetchedPosts;
+    });
+  }
+
+  void _addPost(Post newPost) {
+    setState(() {
+      _postList.insert(0, newPost);
+    });
+  }
+
+  void _deletePost(int id) {
+    setState(() {
+      _postList.removeWhere((post) => post.id == id);
+    });
   }
 
   @override
@@ -40,21 +62,93 @@ class _SeeAllPostState extends State<SeeAllPost> {
             } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
               return const Center(child: Text('No posts found'));
             } else {
-              List<Post> posts = snapshot.data!;
-              return ListView.builder(
-                itemCount: posts.length,
-                itemBuilder: (context, index) {
-                  Post post = posts[index];
-                  return ListTile(
-                    leading: Text('User: ${post.userId}'),
-                    title: Text(post.title),
-                    subtitle: Text(post.body),
-                  );
-                },
+              if (_postList.isEmpty) {
+                _postList = snapshot.data!;
+              }
+              return RefreshIndicator(
+                onRefresh: _refreshPosts,
+                child: ListView.builder(
+                  itemCount: _postList.length,
+                  itemBuilder: (context, index) {
+                    Post post = _postList[index];
+                    String shortenedBody =
+                        '${post.body.substring(0, 10)}${post.body.length > 50 ? '...' : ''}';
+                    return Card(
+                      margin: const EdgeInsets.symmetric(
+                          vertical: 8, horizontal: 16),
+                      child: ListTile(
+                        leading: Text('User: ${post.userId}'),
+                        title: Text(
+                          post.title,
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: RichText(
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: shortenedBody,
+                                style: const TextStyle(color: Colors.black),
+                              ),
+                              if (post.body.length > 50)
+                                TextSpan(
+                                  text: ' See more',
+                                  style: const TextStyle(color: Colors.blue),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () {
+                                      showModalBottomSheet(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return Container(
+                                            padding: const EdgeInsets.all(16),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text('User: ${post.userId}'),
+                                                const SizedBox(height: 8),
+                                                Text(post.title,
+                                                    style: const TextStyle(
+                                                        fontSize: 18,
+                                                        fontWeight:
+                                                            FontWeight.bold)),
+                                                const SizedBox(height: 8),
+                                                Text(post.body),
+                                              ],
+                                            ),
+                                          );
+                                        },
+                                      );
+                                    },
+                                ),
+                            ],
+                          ),
+                        ),
+                        trailing: IconButton(
+                          icon: Icon(Icons.delete, color: Colors.red),
+                          onPressed: () {
+                            _deletePost(post.id);
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                ),
               );
             }
           },
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => AddPostScreen()),
+          );
+          if (result != null && result is Post) {
+            _addPost(result);
+          }
+        },
+        child: Icon(Icons.add),
       ),
     );
   }
