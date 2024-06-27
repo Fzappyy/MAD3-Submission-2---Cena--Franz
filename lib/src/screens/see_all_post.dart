@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:state_change_demo/src/models/post.dart';
 import 'add_post.dart';
+import 'edit_post.dart'; // Import the edit post screen
 
 class SeeAllPost extends StatefulWidget {
   static const String route = 'see-all-post';
@@ -45,6 +46,21 @@ class _SeeAllPostState extends State<SeeAllPost> {
     });
   }
 
+  void _editPost(Post post) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => EditPostScreen(post: post)),
+    );
+    if (result != null && result is Post) {
+      setState(() {
+        int index = _postList.indexWhere((p) => p.id == result.id);
+        if (index != -1) {
+          _postList[index] = result;
+        }
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -80,7 +96,7 @@ class _SeeAllPostState extends State<SeeAllPost> {
                         leading: Text('User: ${post.userId}'),
                         title: Text(
                           post.title,
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         subtitle: RichText(
                           text: TextSpan(
@@ -123,11 +139,22 @@ class _SeeAllPostState extends State<SeeAllPost> {
                             ],
                           ),
                         ),
-                        trailing: IconButton(
-                          icon: Icon(Icons.delete, color: Colors.red),
-                          onPressed: () {
-                            _deletePost(post.id);
-                          },
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit, color: Colors.blue),
+                              onPressed: () {
+                                _editPost(post); // Navigate to edit screen
+                              },
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () {
+                                _deletePost(post.id);
+                              },
+                            ),
+                          ],
                         ),
                       ),
                     );
@@ -148,7 +175,7 @@ class _SeeAllPostState extends State<SeeAllPost> {
             _addPost(result);
           }
         },
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
     );
   }
