@@ -95,9 +95,21 @@ class _EditPostScreenState extends State<EditPostScreen> {
                 },
               ),
               const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _submitPost,
-                child: const Text('Update'),
+              SizedBox(
+                width: 100.0,
+                height: 50.0,
+                child: FloatingActionButton(
+                  backgroundColor: Colors.black,
+                  onPressed: () {
+                    _submitPost();
+                  },
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  child: const Text(
+                    'Update',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
               ),
             ],
           ),

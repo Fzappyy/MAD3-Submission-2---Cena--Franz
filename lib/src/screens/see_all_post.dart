@@ -61,121 +61,201 @@ class _SeeAllPostState extends State<SeeAllPost> {
     }
   }
 
+  void _showOptionsModalSheet(Post post) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.edit, color: Colors.black),
+                title: const Text('Edit'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _editPost(post);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete, color: Colors.red),
+                title: const Text('Delete'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _deletePost(post.id);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(SeeAllPost.name),
+        title: const Text(
+          SeeAllPost.name,
+        ),
+        backgroundColor: Colors.white,
       ),
       body: SafeArea(
-        child: FutureBuilder<List<Post>>(
-          future: posts,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
-            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Center(child: Text('No posts found'));
-            } else {
-              if (_postList.isEmpty) {
-                _postList = snapshot.data!;
-              }
-              return RefreshIndicator(
-                onRefresh: _refreshPosts,
-                child: ListView.builder(
-                  itemCount: _postList.length,
-                  itemBuilder: (context, index) {
-                    Post post = _postList[index];
-                    String shortenedBody =
-                        '${post.body.substring(0, 10)}${post.body.length > 50 ? '...' : ''}';
-                    return Card(
-                      margin: const EdgeInsets.symmetric(
-                          vertical: 8, horizontal: 16),
-                      child: ListTile(
-                        leading: Text('User: ${post.userId}'),
-                        title: Text(
-                          post.title,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: shortenedBody,
-                                style: const TextStyle(color: Colors.black),
-                              ),
-                              if (post.body.length > 50)
-                                TextSpan(
-                                  text: ' See more',
-                                  style: const TextStyle(color: Colors.blue),
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = () {
-                                      showModalBottomSheet(
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return Container(
-                                            padding: const EdgeInsets.all(16),
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text('User: ${post.userId}'),
-                                                const SizedBox(height: 8),
-                                                Text(post.title,
-                                                    style: const TextStyle(
-                                                        fontSize: 18,
-                                                        fontWeight:
-                                                            FontWeight.bold)),
-                                                const SizedBox(height: 8),
-                                                Text(post.body),
-                                              ],
-                                            ),
+        child: Stack(
+          children: [
+            FutureBuilder<List<Post>>(
+              future: posts,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text('No posts found'));
+                } else {
+                  if (_postList.isEmpty) {
+                    _postList = snapshot.data!;
+                  }
+                  return RefreshIndicator(
+                    onRefresh: _refreshPosts,
+                    child: ListView.builder(
+                      itemCount: _postList.length,
+                      itemBuilder: (context, index) {
+                        Post post = _postList[index];
+                        String shortenedBody =
+                            '${post.body.substring(0, 10)}${post.body.length > 50 ? '...' : ''}';
+                        return Card(
+                          color: Colors.white,
+                          shadowColor: Colors.white,
+                          margin: const EdgeInsets.symmetric(
+                              vertical: 8, horizontal: 16),
+                          child: ListTile(
+                            leading: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.person),
+                                Text('User: ${post.userId}'),
+                              ],
+                            ),
+                            title: Text(
+                              post.title,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            subtitle: RichText(
+                              text: TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: shortenedBody,
+                                    style: const TextStyle(color: Colors.black),
+                                  ),
+                                  if (post.body.length > 50)
+                                    TextSpan(
+                                      text: ' See more',
+                                      style:
+                                          const TextStyle(color: Colors.blue),
+                                      recognizer: TapGestureRecognizer()
+                                        ..onTap = () {
+                                          showModalBottomSheet(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return Container(
+                                                padding:
+                                                    const EdgeInsets.all(16),
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        const Icon(
+                                                            Icons.person),
+                                                        const SizedBox(
+                                                          height: 12,
+                                                        ),
+                                                        Text(
+                                                          'User: ${post.userId}',
+                                                          style:
+                                                              const TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    const SizedBox(height: 8),
+                                                    Text(post.title,
+                                                        style: const TextStyle(
+                                                            fontSize: 22,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .bold)),
+                                                    const SizedBox(height: 8),
+                                                    Text(
+                                                      post.body,
+                                                      style: const TextStyle(
+                                                          fontSize: 16),
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                            },
                                           );
                                         },
-                                      );
-                                    },
-                                ),
-                            ],
+                                    ),
+                                ],
+                              ),
+                            ),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.more_horiz),
+                              onPressed: () {
+                                _showOptionsModalSheet(post);
+                              },
+                            ),
                           ),
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.edit, color: Colors.blue),
-                              onPressed: () {
-                                _editPost(post); // Navigate to edit screen
-                              },
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red),
-                              onPressed: () {
-                                _deletePost(post.id);
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
+                        );
+                      },
+                    ),
+                  );
+                }
+              },
+            ),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: SizedBox(
+                  width: 125.0,
+                  height: 50.0,
+                  child: FloatingActionButton(
+                    backgroundColor: Colors.black,
+                    onPressed: () async {
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => AddPostScreen()),
+                      );
+                      if (result != null && result is Post) {
+                        _addPost(result);
+                      }
+                    },
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                    child: const Text(
+                      'Create post',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
                 ),
-              );
-            }
-          },
+              ),
+            ),
+          ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => AddPostScreen()),
-          );
-          if (result != null && result is Post) {
-            _addPost(result);
-          }
-        },
-        child: const Icon(Icons.add),
       ),
     );
   }

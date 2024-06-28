@@ -29,7 +29,7 @@ flutter:
 assets:
   - assets/
   - assets/images
-  - assets/images/profile-user.png
+  - assets/images/blacktwitter.png
   #   - images/a_dot_ham.jpeg
 
   # Uncomment and add your custom fonts here:
