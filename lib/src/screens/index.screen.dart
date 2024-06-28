@@ -76,8 +76,12 @@ class IndexScreen extends StatelessWidget {
                   onTap: () {
                     GoRouter.of(context).push(SeeAllPost.path);
                   },
-                  title: const Text(SeeAllPost.name),
-                  trailing: const Icon(Icons.chevron_right),
+                  title: const Text(
+                    SeeAllPost.name,
+                    style: TextStyle(
+                        color: Colors.red, fontWeight: FontWeight.bold),
+                  ),
+                  trailing: const Icon(Icons.chevron_right, color: Colors.red),
                 ),
               ],
             ),
